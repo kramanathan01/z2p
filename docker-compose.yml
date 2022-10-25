@@ -8,7 +8,7 @@ services:
       - POSTGRES_PASSWORD=S3cr3t
       - POSTGRES_DB=newsletter
       - POSTGRES_PORT=5432
-    restart: always
+    # restart: always
     command: "postgres -N 1000"
     ports:
       - "5432:5432"
