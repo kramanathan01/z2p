@@ -1,0 +1,21 @@
+version: '3'
+services:
+  db:
+    image: postgres:latest
+    container_name: db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=S3cr3t
+      - POSTGRES_DB=newsletter
+      - POSTGRES_PORT=5432
+    restart: always
+    command: "postgres -N 1000"
+    ports:
+      - "5432:5432"
+    volumes:
+      - $HOME/db/z2p:/var/lib/postgresql/data
+      - ./migrations/20221025180410_create_subscriptions_table.sql:/docker-entrypoint-initdb.d/20221025180410_create_subscriptions_table.sql
+    # healthcheck:
+    #   test: ["CMD", "pg_isready", "-U", "postgres"]
+    #   interval: 10s
+    #   start_period: 3m
