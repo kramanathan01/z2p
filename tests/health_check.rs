@@ -1,8 +1,10 @@
 use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
-use tracing::subscriber;
+// use tracing::subscriber;
+use secrecy::ExposeSecret;
 use uuid::Uuid;
+
 use z2p::configuration::{get_configuration, DatabaseSettings};
 use z2p::telemetry::{get_subscriber, init_subscriber};
 
@@ -55,16 +57,17 @@ async fn spawn_app() -> TestApp {
 
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
     // Create database
-    let mut connection = PgConnection::connect(&config.connection_string_without_db())
-        .await
-        .expect("Failed to connect to Postgres server");
+    let mut connection =
+        PgConnection::connect(config.connection_string_without_db().expose_secret())
+            .await
+            .expect("Failed to connect to Postgres server");
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
         .await
         .expect("Failed to create database");
 
     // Migrate database
-    let connection_pool = PgPool::connect(&config.connection_string())
+    let connection_pool = PgPool::connect(config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to database");
     sqlx::migrate!("./migrations")
@@ -76,10 +79,14 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
 
 pub async fn drop_database(db: String) {
     let configuration = get_configuration().expect("Failed to read configuration");
-    let mut connection =
-        PgConnection::connect(&configuration.database.connection_string_without_db())
-            .await
-            .expect("Failed to connect to Postgres server");
+    let mut connection = PgConnection::connect(
+        configuration
+            .database
+            .connection_string_without_db()
+            .expose_secret(),
+    )
+    .await
+    .expect("Failed to connect to Postgres server");
     connection
         .execute(format!(r#"DROP DATABASE "{}" with (FORCE);"#, db).as_str())
         .await
