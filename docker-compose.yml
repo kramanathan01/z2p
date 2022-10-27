@@ -1,5 +1,14 @@
 version: '3'
 services:
+  z2p:
+    build: .
+    environment:
+      - APP_DATABASE__HOST=db
+      - APP_DATABASE__REQUIRE_SSL=false
+    ports:
+      - 8000:8000
+
+    
   db:
     image: postgres:latest
     container_name: db
