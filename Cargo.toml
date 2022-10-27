@@ -15,9 +15,10 @@ name = "z2p"
 actix-web = "4"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1.0.147", features = ["derive"] }
+serde-aux = "4.0.0"
 config = "0.13.2"
 uuid = { version = "1.2.1", features = ["v4"] }
-chrono = "0.4.22"
+chrono = { version = "0.4.22", default-features = false, features = ["clock"] }
 tracing = { version = "0.1.37", features = ["log"] }
 tracing-subscriber = { version = "0.3.16", features =["registry", "env-filter"] }
 tracing-bunyan-formatter = "0.3.4"
@@ -35,6 +36,7 @@ features = [
     "uuid",
     "chrono",
     "migrate",
+    "offline",
 ]
 
 [dev-dependencies]
