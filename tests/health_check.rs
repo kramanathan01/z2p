@@ -172,3 +172,31 @@ async fn subscribe_returns_400_for_bad_form_data() {
     // Cleanup
     drop_database(testapp.random_db_name).await;
 }
+
+#[tokio::test]
+async fn subscribe_returns_400_when_fields_are_present_but_empty() {
+    let testapp = spawn_app().await;
+    let test_cases = vec![
+        ("name=&email=ursula_le_guin%40gmail.com", "empty name"),
+        ("name=Ursula&email=", "empty email"),
+        ("name=Ursula&email=definitely-not-an-email", "invalid email"),
+    ];
+
+    let client = reqwest::Client::new();
+    for (body, description) in test_cases {
+        let response = client
+            .post(&format!("{}/subscriptions", &testapp.address))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(body)
+            .send()
+            .await
+            .expect("Failed to execute request");
+
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "The API did not return a 400 Bad Request when payload was {}",
+            description
+        )
+    }
+}
